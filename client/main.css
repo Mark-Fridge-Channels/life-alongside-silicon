@@ -1,0 +1,88 @@
+/* 基础布局与桌面/手机适配 */
+* { box-sizing: border-box; }
+html { font-size: 16px; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #1a1a1a; /* 无图时的底色 */
+  color: #e0e0e0;
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  position: relative;
+}
+/* 背景层：严格锁定为视口大小，文字再长也不参与布局、不被拉伸 */
+#bg-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  z-index: 0;
+  background-color: #1a1a1a;
+  pointer-events: none;
+  overflow: hidden;
+}
+#bg-layer img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+/* 遮罩层，保证文字可读 */
+#bg-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.25) 40%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  pointer-events: none;
+}
+#app { position: relative; min-height: 100vh; min-height: 100dvh; z-index: 1; }
+#typewriter-container {
+  padding: clamp(0.75rem, 4vw, 1.5rem);
+  max-width: 65rem;
+  margin: 0 auto;
+  min-height: 50vh;
+}
+.typewriter-target {
+  font-size: clamp(0.9375rem, 2.5vw, 1.125rem);
+}
+.typewriter-target h1 { font-size: 1.5em; }
+.typewriter-target h2 { font-size: 1.25em; }
+.typewriter-target h3 { font-size: 1.1em; }
+.typewriter-target p { margin: 0.5em 0; }
+.typewriter-target ul, .typewriter-target ol { margin: 0.5em 0; padding-left: 1.5em; }
+.typewriter-target code { background: rgba(255,255,255,0.1); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.9em; }
+.typewriter-target pre { overflow: auto; padding: 0.75rem; border-radius: 6px; background: rgba(0,0,0,0.3); }
+.typewriter-target pre code { background: none; padding: 0; }
+.error { color: #f88; margin: 0; }
+@media (max-width: 768px) {
+  #typewriter-container { padding: 0.75rem 1rem; }
+  .typewriter-target { font-size: 0.9375rem; }
+}
+.bg-upload {
+  position: fixed;
+  bottom: clamp(0.75rem, 4vw, 1rem);
+  right: clamp(0.75rem, 4vw, 1rem);
+  padding: 0.5rem 1rem;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.bg-upload:hover { background: rgba(0,0,0,0.8); }
