@@ -52,3 +52,9 @@
 - [x] 🟩 **Step 8: 桌面与手机适配**
   - [x] 🟩 背景图 cover/center、文字区居中可读、字体与间距相对单位（clamp）
   - [x] 🟩 小屏 ≤768px 媒体查询，避免文字过小与溢出
+
+- [x] 🟩 **Step 9: 打字时视口跟随（当前行保持居中）**
+  - [x] 🟩 内容超过一屏时，在 TypeIt afterStep 中平滑滚动，使当前打字行保持在视口中间
+  - [x] 🟩 节流（SCROLL_THROTTLE_MS）与居中容差（SCROLL_CENTER_TOLERANCE_PX）避免抖动与微调
+  - [x] 🟩 用户主动上滚阅读时不再跟滚（光标在视口中心上方超过 USER_SCROLL_UP_TOLERANCE_PX 则跳过）
+  - [x] 🟩 打字结束后 afterComplete 时再执行一次居中滚动

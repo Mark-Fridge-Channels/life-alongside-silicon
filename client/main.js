@@ -10,12 +10,46 @@ const API_BASE = '';
 const POLL_INTERVAL_MS = Number(window.__POLL_INTERVAL_MS__) || 60000;
 const TYPE_SPEED = 80;
 const NEXT_STRING_DELAY = 200;
+/** 打字时保持当前行在视口中间的滚动：节流间隔（ms），避免每字都滚造成抖动 */
+const SCROLL_THROTTLE_MS = 120;
+/** 当前行与视口中心的距离小于此值（px）时不再微调，避免频繁滚动 */
+const SCROLL_CENTER_TOLERANCE_PX = 60;
+/** 光标在视口中心上方超过此距离（px）时视为用户主动上滚阅读，不再自动跟滚 */
+const USER_SCROLL_UP_TOLERANCE_PX = 80;
 
 const container = document.getElementById('typewriter-container');
 const bgFileInput = document.getElementById('bg-file');
 
 let lastContentHash = '';
 let typeItInstance = null;
+/** 上次执行「跟随打字滚动」的时间戳，用于节流 */
+let lastScrollToCenterAt = 0;
+
+/**
+ * 在打字过程中将「当前打字行」保持在视口中间：仅当内容超出一屏、且光标不在视口中心上方（未主动上滚）时平滑滚动。
+ * 供 TypeIt 的 afterStep / afterComplete 调用；内部节流，避免每字一滚造成抖动。
+ * @param {{ getElement: () => HTMLElement }} instance - TypeIt 实例，用于取目标元素与光标节点
+ */
+function scrollToKeepTypingCentered(instance) {
+  if (!instance || typeof instance.getElement !== 'function') return;
+  const now = Date.now();
+  if (now - lastScrollToCenterAt < SCROLL_THROTTLE_MS) return;
+  if (document.body.scrollHeight <= window.innerHeight) return;
+
+  const el = instance.getElement();
+  const cursor = el?.querySelector?.('.ti-cursor') || el;
+  if (!cursor) return;
+
+  const rect = cursor.getBoundingClientRect();
+  const viewportCenter = window.innerHeight / 2;
+  const cursorCenterY = rect.top + rect.height / 2;
+
+  if (cursorCenterY < viewportCenter - USER_SCROLL_UP_TOLERANCE_PX) return;
+  if (Math.abs(cursorCenterY - viewportCenter) < SCROLL_CENTER_TOLERANCE_PX) return;
+
+  lastScrollToCenterAt = now;
+  cursor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
 
 /**
  * 将整页 Markdown 按段拆分（双换行为一段），每段转 HTML。
@@ -51,6 +85,13 @@ function runTypewriter(htmlSegments) {
     breakLines: true,
     speed: TYPE_SPEED,
     nextStringDelay: NEXT_STRING_DELAY,
+    afterStep(instance) {
+      scrollToKeepTypingCentered(instance);
+    },
+    afterComplete(instance) {
+      lastScrollToCenterAt = 0;
+      scrollToKeepTypingCentered(instance);
+    },
   });
   typeItInstance.go();
 }
